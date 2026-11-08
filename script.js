@@ -1,180 +1,247 @@
-// Fungsi untuk memulai musik
-function playMusic() {
-  const music = document.getElementById('background-music');
-  music.play();
+// Musik: browser butuh satu sentuhan sebelum boleh bersuara.
+const music = document.getElementById('background-music');
+const musicToggle = document.getElementById('music-toggle');
+
+function perbaruiTombolMusik() {
+  const sedangMain = !music.paused;
+  musicToggle.classList.toggle('playing', sedangMain);
+  musicToggle.setAttribute('aria-label', sedangMain ? 'Matikan musik' : 'Nyalakan musik');
+  musicToggle.setAttribute('title', sedangMain ? 'Matikan musik' : 'Nyalakan musik');
 }
-window.addEventListener('DOMContentLoaded', function() {
-  playMusic();
+
+function cobaPutarMusik() {
+  const hasil = music.play();
+  if (hasil && hasil.then) {
+    hasil.then(perbaruiTombolMusik).catch(perbaruiTombolMusik);
+  } else {
+    perbaruiTombolMusik();
+  }
+}
+
+music.addEventListener('play', perbaruiTombolMusik);
+music.addEventListener('pause', perbaruiTombolMusik);
+
+musicToggle.addEventListener('click', function () {
+  if (music.paused) {
+    cobaPutarMusik();
+  } else {
+    music.pause();
+  }
 });
-document.body.addEventListener('click', playMusic, { once: true });
-const content = document.getElementById('content');
-const footer = document.getElementsByTagName('footer')[0];
-const timer = document.getElementById('timer');
 
-const second = 1000,
-  minute = second * 60,
-  hour = minute * 60,
-  day = hour * 24;
-let countDown = new Date('Oct 22, 2023 00:00:00').getTime(),
-  x = setInterval(function () {
-    let now = new Date().getTime(),
-      distance = countDown - now;
-    // document.getElementById('days').innerText = Math.floor(distance / (day)),
-    document.getElementById('hours').innerText = Math.floor(distance / (hour)),
-      document.getElementById('minutes').innerText = Math.floor((distance % (hour)) / (minute)),
-      document.getElementById('seconds').innerText = Math.floor((distance % (minute)) / second);
+perbaruiTombolMusik();
 
-    if (distance < 0) {
+const intro = document.getElementById('intro');
+const mulai = document.getElementById('mulai');
 
-      timer.classList.add('d-none');
-      confetti();
-      clearInterval(x);
-      _slideSatu();
-    }
+let sudahMulai = false;
 
-  }, second)
+function mulaiSekarang() {
+  if (sudahMulai) return;
+  sudahMulai = true;
+  intro.classList.add('d-none');
+  musicToggle.classList.remove('d-none');
+  cobaPutarMusik();
+  confetti();
+  _slideSatu();
+}
+
+mulai.addEventListener('click', mulaiSekarang);
+
+let sudahSatu = false,
+  sudahDua = false,
+  sudahTiga = false,
+  sudahEmpat = false,
+  sudahLima = false;
+
+const LEMBUT_MS = 1050;
+
+function tampilkan(el) {
+  el.classList.remove('d-none', 'fade-keluar');
+  el.classList.add('fade-masuk');
+}
+
+function sembunyikan(el, selesai) {
+  el.classList.remove('fade-masuk');
+  el.classList.add('fade-keluar');
+  if (selesai) setTimeout(selesai, LEMBUT_MS);
+}
 
 const _slideSatu = function () {
-  const tap = document.getElementById('tap');
-  const slideSatu = document.getElementById('slideSatu');
-  slideSatu.classList.remove('d-none');
-  setTimeout(function () {
-    tap.classList.remove('d-none');
-    document.body.addEventListener('click', function () {
-      _slideDua();
-    })
-  }, 7000);
+  if (sudahSatu) return;
+  sudahSatu = true;
+  tampilkan(document.getElementById('slideSatu'));
+  setTimeout(_slideDua, 5500);
 };
 
 const _slideDua = function () {
+  if (sudahDua) return;
+  sudahDua = true;
+
   const slideSatu = document.getElementById('slideSatu');
-  const tap = document.getElementById('tap');
   const slideDua = document.getElementById('slideDua');
 
-  setTimeout(function () {
-    slideSatu.classList.replace('animate__slideInDown', 'animate__backOutDown');
-    tap.classList.add('d-none');
-    setTimeout(function () {
-      slideSatu.classList.add('d-none');
-    }, 1000);
-  }, 1000);
-
-  slideDua.classList.remove('d-none');
-  setTimeout(function () {
-    tap.classList.remove('d-none');
-    document.body.addEventListener('click', function () {
-      slideDua.classList.replace('animate__zoomInDown', 'animate__fadeOutLeft');
-      slideDua.classList.remove('animate__delay-2s', 'animate__slow');
-      tap.classList.add('d-none');
-      setTimeout(function () {
-        slideDua.remove();
-        _slideTiga();
-      }, 1000);
-    })
-  }, 40000);
+  sembunyikan(slideSatu, function () {
+    slideSatu.classList.add('d-none');
+    tampilkan(slideDua);
+    teks1Typer.go();
+  });
 };
 
 const _slideTiga = function () {
-  const tap = document.getElementById('tap');
+  if (sudahTiga) return;
+  sudahTiga = true;
+
+  const slideDua = document.getElementById('slideDua');
   const slideTiga = document.getElementById('slideTiga');
 
-  slideTiga.classList.remove('d-none');
-  setTimeout(function () {
-    tap.classList.remove('d-none');
-    document.body.addEventListener('click', function () {
-      slideTiga.classList.remove('animate__delay-2s', 'animate__slow');
-      slideTiga.classList.replace('animate__fadeInRight', 'animate__fadeOut');
-      tap.remove();
-      setTimeout(function () {
-        slideTiga.remove();
-        _slideEmpat();
-      }, 1000);
-    })
-  }, 43000);
-}
-
-function getRandomPosition(element) {
-  var x = document.body.offsetHeight - element.clientHeight;
-  var y = document.body.offsetWidth - element.clientWidth;
-  var randomX = Math.floor(Math.random() * 500);
-  var randomY = Math.floor(Math.random() * y);
-  return [randomX, randomY];
+  sembunyikan(slideDua, function () {
+    slideDua.remove();
+    tampilkan(slideTiga);
+    teks2Typer.go();
+  });
 };
 
 const _slideEmpat = function () {
+  if (sudahEmpat) return;
+  sudahEmpat = true;
+
+  const slideTiga = document.getElementById('slideTiga');
   const slideEmpat = document.getElementById('slideEmpat');
-  const btn = document.getElementsByTagName('button');
-  slideEmpat.classList.remove('d-none');
 
-  btn[0].addEventListener('click', function () {
-    var xy = getRandomPosition(slideEmpat);
-    slideEmpat.style.top = xy[0] + 'px';
-    // slideEmpat.style.left = xy[1] + 'px';
-  });
+  sembunyikan(slideTiga, function () {
+    slideTiga.remove();
+    tampilkan(slideEmpat);
 
-  btn[1].addEventListener('click', function () {
-    slideEmpat.classList.replace('animate__fadeInDown', 'animate__bounceOut');
-    slideEmpat.classList.remove('animate__delay-2s');
-    setTimeout(function () {
-      slideEmpat.remove()
-      setTimeout(() => {
+    const gifGak = document.getElementById('gif-gak');
+    let selesai = false;
+    let timerLanjut = null;
+    let intervalPindah = null;
+
+    const lanjut = function () {
+      if (selesai) return;
+      selesai = true;
+      clearTimeout(timerLanjut);
+      clearInterval(intervalPindah);
+      sembunyikan(slideEmpat, function () {
+        slideEmpat.remove();
         _slideLima();
-      }, 500);
-    }, 1000);
-  })
+      });
+    };
+
+    const jadwalkanLanjut = function (ms) {
+      clearTimeout(timerLanjut);
+      timerLanjut = setTimeout(lanjut, ms);
+    };
+
+    const pindahKotak = function () {
+      const lebar = slideEmpat.offsetWidth;
+      const tinggi = slideEmpat.offsetHeight;
+      const maxKiri = Math.max(0, (window.innerWidth - lebar) / 2 - 12);
+      const maxAtas = Math.max(10, window.innerHeight - tinggi - 20);
+      const minAtas = Math.min(150, maxAtas);
+      let atas = 300;
+      let kiri = 0;
+      let percobaan = 0;
+
+      do {
+        atas = minAtas + Math.random() * Math.max(0, maxAtas - minAtas);
+        kiri = (Math.random() * 2 - 1) * maxKiri;
+        percobaan++;
+      } while (
+        Math.hypot(
+          atas - (parseFloat(slideEmpat.style.top) || 300),
+          kiri - (parseFloat(slideEmpat.style.left) || 0)
+        ) < 90 && percobaan < 12
+      );
+
+      slideEmpat.style.top = atas + 'px';
+      slideEmpat.style.left = kiri + 'px';
+    };
+
+    const mulaiPindah = function () {
+      if (intervalPindah) return;
+      intervalPindah = setInterval(pindahKotak, 1400);
+    };
+
+    document.getElementById('gak').addEventListener('click', function () {
+      gifGak.classList.remove('d-none');
+      mulaiPindah();
+      pindahKotak();
+      jadwalkanLanjut(8000);
+    });
+
+    document.getElementById('suka').addEventListener('click', lanjut);
+    jadwalkanLanjut(8000);
+  });
 };
 
 const _slideLima = function () {
+  if (sudahLima) return;
+  sudahLima = true;
+
   const slideLima = document.getElementById('slideLima');
-  slideLima.classList.remove('d-none');
   const trims = document.getElementById('trims');
 
-  setTimeout(() => {
-    trims.classList.remove('d-none');
-  }, 1000);
+  tampilkan(slideLima);
+  setTimeout(function () {
+    tampilkan(trims);
+    trimsTyper.go();
+  }, 900);
 
-  slideLima.addEventListener('animationend', () => {
-    slideLima.classList.add('animate__delay-3s')
-    slideLima.classList.replace('animate__bounceIn', 'animate__fadeOut');
-    trims.classList.add('animate__animated', 'animate__fadeOut', 'animate__delay-3s');
-    setTimeout(() => {
+  setTimeout(function () {
+    sembunyikan(slideLima);
+    sembunyikan(trims);
+    setTimeout(function () {
+      slideLima.remove();
       trims.remove();
-      setTimeout(() => {
-        slideLima.remove();
-        _slideEnam();
-      }, 1000);
-    }, 6000);
-  });
+      _slideEnam();
+    }, LEMBUT_MS);
+  }, 6000);
 };
 
 const _slideEnam = function () {
   const slideEnam = document.getElementById('slideEnam');
-  slideEnam.classList.remove('d-none');
+  tampilkan(slideEnam);
+  const gallery = slideEnam.querySelector('.gallery');
+  setTimeout(function () {
+    gallery.classList.add('aktif');
+  }, 150);
 };
 
+const teks1Typer = new TypeIt("#teks1", {
+  strings: [
+    "Selamat ulang tahun, ya sayangkuu. 🎂💐",
+    "Makasih sudah bertahan sampai hari ini, dan makasih sudah milih aku buat nemenin kamu.",
+    "Aku bersyukur banget punya kamu. Doaku, semoga tahun ini lebih ringan buat kamu, sehat terus, dan semua yang kamu usahakan dimudahkan jalannya."
+  ],
+  startDelay: 700,
+  speed: 55,
+  lifeLike: false,
+  afterComplete: function () {
+    setTimeout(_slideTiga, 2000);
+  }
+});
 
-new TypeIt("#teks1", {
-  strings: ["Hari ini, saya langitkan semua doa terbaik saya untuk kamu.", "Semoga hal-hal yang membuat kamu runtuh turut menjadi alasan kamu untuk tetap tumbuh.", "Semoga dunia senantiasa menjaga kamu dimanapun kamu berada.", "Semoga hari-hari kamu selalu diiringi cinta yang tak pernah ada batasnya." , "Semoga setiap langkahmu dimudahkan hingga tercapai apa yang kamu inginkan."],
-  startDelay: 4000,
-  speed: 75,
-  waitUntilVisible: true
-}).go();
+const teks2Typer = new TypeIt("#teks2", {
+  strings: [
+    "Untuk kita: semoga kita terus bareng, saling jaga, dan kalau ada masalah kita hadapi berdua. 💙",
+    "Untuk masa depan kamu: semoga semua yang kamu cita-citakan tercapai, dan aku masih di sini buat lihat itu.",
+    "Panjang umur, bahagia terus. Aku sayang banget sama kamu🫰🏻."
+  ],
+  startDelay: 700,
+  speed: 55,
+  lifeLike: false,
+  afterComplete: function () {
+    setTimeout(_slideEmpat, 2200);
+  }
+});
 
-new TypeIt("#teks2", {
-  strings: ["Dengan ataupun tanpaku, semoga semesta selalu membahagiakan kamu bagimanapun caranya.", " ", "barakallah fi umrik, terima kasih sudah bertahan sampai sejauh ini.", " ", "- Wish all you the best"],
-  startDelay: 2000,
-  speed: 75,
-  waitUntilVisible: true
-}).go();
-
-
-new TypeIt("#trims", {
-  strings: ["Terimakasih."],
-  startDelay: 2000,
-  speed: 150,
-  loop: false,
-  waitUntilVisible: true,
-}).go();
+const trimsTyper = new TypeIt("#trims", {
+  strings: ["selamat ulang tahun cantikk. 🤍🫶🏻"],
+  startDelay: 300,
+  speed: 140
+});
 
 
 
