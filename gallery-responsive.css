@@ -1,0 +1,24 @@
+/* Responsifkan foto galeri dan cegah aturan .foto global mengubah ukuran kartu. */
+.kartu .foto {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Tampilkan seluruh foto tanpa terpotong; ruang kosong mengikuti warna latar kartu. */
+.kartu .foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background-color: #e7f3ff;
+}
+
+@media (max-width: 640px) {
+  .kartu .foto {
+    width: 100%;
+    min-width: 0;
+  }
+}
